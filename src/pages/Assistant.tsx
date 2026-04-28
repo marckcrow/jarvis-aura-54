@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { Send, Mic, Square, Sparkles } from "lucide-react";
+import { Send, Mic, Square, Sparkles, ShieldAlert } from "lucide-react";
 import { JarvisAvatar } from "@/components/jarvis/JarvisAvatar";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-type Msg = { role: "user" | "assistant"; content: string };
-
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jarvis-chat`;
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  intent?: string;
+  requires_confirmation?: boolean;
+  command_id?: string;
+};
 
 const suggestions = [
   "Resuma minha agenda da semana",
@@ -37,61 +42,27 @@ const Assistant = () => {
     setStreaming(true);
 
     try {
-      const resp = await fetch(CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: next }),
+      const history = next.slice(-10).map((m) => ({ role: m.role, content: m.content }));
+      const { data, error } = await supabase.functions.invoke("jarvis-brain", {
+        body: { messages: history.slice(0, -1), input_text: trimmed },
       });
-
-      if (!resp.ok || !resp.body) {
-        if (resp.status === 429) toast.error("Muitas requisições. Aguarde um momento.");
-        else if (resp.status === 402) toast.error("Créditos esgotados no workspace.");
-        else toast.error("Falha ao contatar o assistente.");
-        setStreaming(false);
-        return;
-      }
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      let assistantText = "";
-      let done = false;
-
-      // Add empty assistant message
-      setMessages((m) => [...m, { role: "assistant", content: "" }]);
-
-      while (!done) {
-        const { done: d, value } = await reader.read();
-        if (d) break;
-        buf += decoder.decode(value, { stream: true });
-
-        let idx;
-        while ((idx = buf.indexOf("\n")) !== -1) {
-          let line = buf.slice(0, idx);
-          buf = buf.slice(idx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line || line.startsWith(":")) continue;
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") { done = true; break; }
-          try {
-            const parsed = JSON.parse(json);
-            const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) {
-              assistantText += delta;
-              setMessages((m) => {
-                const copy = [...m];
-                copy[copy.length - 1] = { role: "assistant", content: assistantText };
-                return copy;
-              });
-            }
-          } catch {
-            buf = line + "\n" + buf;
-            break;
-          }
+      if (error) {
+        const msg = (error as any)?.context?.status === 429
+          ? "Muitas requisições. Aguarde."
+          : (error as any)?.context?.status === 402
+          ? "Créditos esgotados no workspace."
+          : "Falha ao contatar JARVIS.";
+        toast.error(msg);
+      } else if (data?.response_text) {
+        setMessages((m) => [...m, {
+          role: "assistant",
+          content: data.response_text,
+          intent: data.intent,
+          requires_confirmation: data.requires_confirmation,
+          command_id: data.command_id,
+        }]);
+        if (data.requires_confirmation) {
+          toast.info("Ação aguardando confirmação no Command Center.");
         }
       }
     } catch (e) {
@@ -177,8 +148,20 @@ const Assistant = () => {
                     <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.3s" }} />
                   </div>
                 ) : (
-                  <div className={`prose prose-sm prose-invert max-w-none prose-p:my-1 prose-headings:text-primary prose-strong:text-primary prose-code:text-accent ${m.role === "assistant" && i === messages.length - 1 && streaming ? "typing-cursor" : ""}`}>
-                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                  <div className="space-y-2">
+                    <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-headings:text-primary prose-strong:text-primary prose-code:text-accent">
+                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                    </div>
+                    {m.role === "assistant" && m.intent && m.intent !== "chat" && (
+                      <div className="flex items-center gap-2 pt-2 border-t border-primary/10 text-[10px] font-mono tracking-wider">
+                        <span className="text-primary uppercase">{m.intent}</span>
+                        {m.requires_confirmation && (
+                          <span className="flex items-center gap-1 text-accent">
+                            <ShieldAlert className="w-3 h-3" /> AGUARDA APROVAÇÃO
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
