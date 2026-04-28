@@ -45,7 +45,11 @@ const Memory = () => {
     const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("user_id", user.id).maybeSingle();
     if (!profile) { toast.error("Profile não encontrado"); setBusy(false); return; }
     const { error } = await supabase.from("jarvis_memory").insert([{
-      ...parsed.data, user_id: user.id, tenant_id: profile.tenant_id,
+      memory_type: parsed.data.memory_type,
+      title: parsed.data.title,
+      content: parsed.data.content,
+      user_id: user.id,
+      tenant_id: profile.tenant_id,
     }]);
     if (error) toast.error(error.message);
     else { toast.success("Memória salva"); setTitle(""); setContent(""); load(); }
