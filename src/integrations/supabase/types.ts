@@ -14,13 +14,218 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      connected_systems: {
+        Row: {
+          api_base_url: string | null
+          created_at: string
+          id: string
+          settings: Json | null
+          status: string
+          system_name: string
+          system_type: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+          webhook_url: string | null
+        }
+        Insert: {
+          api_base_url?: string | null
+          created_at?: string
+          id?: string
+          settings?: Json | null
+          status?: string
+          system_name: string
+          system_type: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+          webhook_url?: string | null
+        }
+        Update: {
+          api_base_url?: string | null
+          created_at?: string
+          id?: string
+          settings?: Json | null
+          status?: string
+          system_name?: string
+          system_type?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      jarvis_actions: {
+        Row: {
+          action_type: string
+          command_id: string | null
+          created_at: string
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          payload: Json | null
+          requires_confirmation: boolean
+          result: Json | null
+          status: string
+          target_system: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          command_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          payload?: Json | null
+          requires_confirmation?: boolean
+          result?: Json | null
+          status?: string
+          target_system?: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          command_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          payload?: Json | null
+          requires_confirmation?: boolean
+          result?: Json | null
+          status?: string
+          target_system?: string | null
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jarvis_actions_command_id_fkey"
+            columns: ["command_id"]
+            isOneToOne: false
+            referencedRelation: "jarvis_commands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jarvis_commands: {
+        Row: {
+          created_at: string
+          detected_intent: string | null
+          id: string
+          input_text: string
+          metadata: Json | null
+          response_text: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          detected_intent?: string | null
+          id?: string
+          input_text: string
+          metadata?: Json | null
+          response_text?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          detected_intent?: string | null
+          id?: string
+          input_text?: string
+          metadata?: Json | null
+          response_text?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      jarvis_memory: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean
+          memory_type: string
+          metadata: Json | null
+          tenant_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          memory_type: string
+          metadata?: Json | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          memory_type?: string
+          metadata?: Json | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_tenant_id: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
