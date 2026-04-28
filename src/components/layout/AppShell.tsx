@@ -1,10 +1,13 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, MessageSquare, FolderKanban, ListChecks, Plug, Settings, Shield, Activity } from "lucide-react";
+import { LayoutDashboard, MessageSquare, FolderKanban, ListChecks, Plug, Settings, Shield, Activity, Terminal, Brain, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/assistant", label: "Assistente", icon: MessageSquare },
+  { to: "/command-center", label: "Comandos", icon: Terminal },
+  { to: "/memory", label: "Memória", icon: Brain },
   { to: "/projects", label: "Projetos", icon: FolderKanban },
   { to: "/tasks", label: "Tarefas", icon: ListChecks },
   { to: "/integrations", label: "Integrações", icon: Plug },
@@ -14,6 +17,7 @@ const navItems = [
 
 export const AppShell = () => {
   const { pathname } = useLocation();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="relative min-h-screen w-full flex">
@@ -64,8 +68,11 @@ export const AppShell = () => {
             <Activity className="w-4 h-4 text-primary animate-pulse" />
             <div className="flex-1">
               <div className="text-xs font-mono text-foreground">Sistema Online</div>
-              <div className="text-[10px] text-muted-foreground">Latência: 12ms</div>
+              <div className="text-[10px] text-muted-foreground truncate">{user?.email ?? "—"}</div>
             </div>
+            <button onClick={signOut} title="Sair" className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </aside>
