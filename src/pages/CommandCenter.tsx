@@ -56,14 +56,42 @@ const CommandCenter = () => {
   const filtered = commands.filter((c) => filter === "all" ? true : c.status === filter);
 
   const confirmAction = async (action: Action, approve: boolean) => {
-    const newStatus = approve ? "executed" : "cancelled";
+    if (!approve) {
+      const { error } = await supabase.from("jarvis_actions").update({
+        status: "cancelled",
+      }).eq("id", action.id);
+      if (error) toast.error("Falha ao cancelar ação");
+      else toast.success("Ação cancelada");
+      return;
+    }
+
+    // Real execution path — currently only Google Calendar is wired up.
+    if (action.action_type === "create_calendar_event") {
+      // Mark as processing for UX feedback
+      await supabase.from("jarvis_actions").update({ status: "processing" }).eq("id", action.id);
+      toast.loading("Criando evento no Google Calendar...", { id: action.id });
+      const { data, error } = await supabase.functions.invoke("execute-calendar-event", {
+        body: { action_id: action.id },
+      });
+      toast.dismiss(action.id);
+      if (error || (data && (data as { error?: string }).error)) {
+        const msg = (data as { error?: string })?.error || error?.message || "Falha ao criar evento";
+        toast.error(msg);
+        return;
+      }
+      const link = (data as { html_link?: string })?.html_link;
+      toast.success(link ? "Evento criado no Google Calendar" : "Evento criado");
+      return;
+    }
+
+    // Fallback: other action types still simulated until integrações forem ligadas
     const { error } = await supabase.from("jarvis_actions").update({
-      status: newStatus,
-      executed_at: approve ? new Date().toISOString() : null,
-      result: approve ? { simulated: true, note: "Execução simulada — integração externa pendente" } : null,
+      status: "executed",
+      executed_at: new Date().toISOString(),
+      result: { simulated: true, note: "Execução simulada — integração externa pendente" },
     }).eq("id", action.id);
     if (error) toast.error("Falha ao atualizar ação");
-    else toast.success(approve ? "Ação aprovada e marcada como executada" : "Ação cancelada");
+    else toast.success("Ação aprovada (simulada)");
   };
 
   const selectedCmd = commands.find((c) => c.id === selected);
