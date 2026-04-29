@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { StatusBadge } from "@/components/jarvis/StatusBadge";
 import { Terminal, ChevronRight, Check, X, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { CalendarConnectionBadge } from "@/components/jarvis/CalendarConnectionBadge";
 
 type Cmd = {
   id: string;
@@ -105,10 +106,15 @@ const CommandCenter = () => {
           <div className="h-px w-8 bg-primary" />
           <span className="text-xs font-mono tracking-[0.3em] text-primary">CENTRAL DE COMANDOS</span>
         </div>
-        <h1 className="font-display text-4xl font-bold flex items-center gap-3">
-          <Terminal className="w-8 h-8 text-primary" /> Command Center
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">Histórico, status e aprovação de comandos enviados ao JARVIS.</p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="font-display text-4xl font-bold flex items-center gap-3">
+              <Terminal className="w-8 h-8 text-primary" /> Command Center
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">Histórico, status e aprovação de comandos enviados ao JARVIS.</p>
+          </div>
+          <CalendarConnectionBadge />
+        </div>
       </div>
 
       <div className="flex gap-2 mb-4">
@@ -191,6 +197,9 @@ const CommandCenter = () => {
                         <StatusBadge status={a.status} />
                       </div>
                       {a.target_system && <div className="text-[10px] font-mono text-muted-foreground">→ {a.target_system}</div>}
+                      {a.target_system === "google_calendar" && (
+                        <CalendarConnectionBadge compact />
+                      )}
                       <pre className="text-[10px] font-mono text-muted-foreground bg-background/50 p-2 rounded overflow-x-auto max-h-32">
 {JSON.stringify(a.payload, null, 2)}
                       </pre>
