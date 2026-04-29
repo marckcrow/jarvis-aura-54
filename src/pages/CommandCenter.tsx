@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { StatusBadge } from "@/components/jarvis/StatusBadge";
-import { Terminal, ChevronRight, Check, X } from "lucide-react";
+import { Terminal, ChevronRight, Check, X, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 type Cmd = {
@@ -24,6 +24,7 @@ type Action = {
   requires_confirmation: boolean;
   payload: Record<string, unknown>;
   error_message: string | null;
+  result: Record<string, unknown> | null;
 };
 
 const CommandCenter = () => {
@@ -202,6 +203,16 @@ const CommandCenter = () => {
                             <X className="w-3 h-3" /> CANCELAR
                           </button>
                         </div>
+                      )}
+                      {a.status === "executed" && a.result && typeof (a.result as { html_link?: string }).html_link === "string" && (
+                        <a
+                          href={(a.result as { html_link: string }).html_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs font-mono text-primary hover:text-primary/80 transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Abrir no Google Calendar
+                        </a>
                       )}
                       {a.error_message && <div className="text-xs text-destructive">{a.error_message}</div>}
                     </div>
