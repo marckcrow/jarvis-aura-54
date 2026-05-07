@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { JarvisAvatar } from "@/components/jarvis/JarvisAvatar";
 import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useJarvisGreeting } from "@/hooks/useJarvisGreeting";
 
 const stats = [
   { label: "Conversas", value: "247", change: "+12%", icon: MessageSquare },
@@ -18,6 +19,7 @@ const activity = [
 ];
 
 const Dashboard = () => {
+  useJarvisGreeting();
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
