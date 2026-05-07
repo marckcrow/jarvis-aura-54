@@ -1,7 +1,8 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, MessageSquare, FolderKanban, ListChecks, Plug, Settings, Shield, Activity, Terminal, Brain, LogOut } from "lucide-react";
+import { LayoutDashboard, MessageSquare, FolderKanban, ListChecks, Plug, Settings, Shield, Activity, Terminal, Brain, LogOut, Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -18,11 +19,45 @@ const navItems = [
 export const AppShell = () => {
   const { pathname } = useLocation();
   const { user, signOut } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   return (
     <div className="relative min-h-screen w-full flex">
-      {/* Sidebar */}
-      <aside className="relative z-10 w-64 shrink-0 border-r border-primary/10 glass-strong flex flex-col">
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-primary/10 flex items-center justify-between px-4 h-14">
+        <NavLink to="/dashboard" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-primary-foreground bg-gradient-to-br from-primary to-accent">J</div>
+          <span className="font-display font-bold tracking-wider">JARVIS</span>
+        </NavLink>
+        <button onClick={() => setMobileOpen((v) => !v)} className="p-2 text-primary" aria-label="menu">
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-30 pt-14 bg-background/95 backdrop-blur-sm">
+          <nav className="p-4 space-y-1 overflow-auto h-full pb-24">
+            {navItems.map((item) => {
+              const active = pathname === item.to;
+              const Icon = item.icon;
+              return (
+                <NavLink key={item.to} to={item.to} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-mono ${active ? "text-primary bg-primary/10" : "text-muted-foreground"}`}>
+                  <Icon className="w-4 h-4" /> {item.label}
+                </NavLink>
+              );
+            })}
+            <button onClick={signOut} className="w-full mt-4 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-mono text-destructive">
+              <LogOut className="w-4 h-4" /> Sair
+            </button>
+          </nav>
+        </div>
+      )}
+
+      {/* Sidebar (desktop) */}
+      <aside className="hidden md:flex relative z-10 w-64 shrink-0 border-r border-primary/10 glass-strong flex-col">
         <div className="p-6 border-b border-primary/10">
           <NavLink to="/dashboard" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10 rounded-lg flex items-center justify-center font-display font-bold text-xl text-primary-foreground bg-gradient-to-br from-primary to-accent shadow-[0_0_20px_hsl(168_100%_50%/0.5)]">
