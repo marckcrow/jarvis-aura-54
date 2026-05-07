@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS gender TEXT NOT NULL DEFAULT 'neutro' CHECK (gender IN ('masculino','feminino','neutro'));
