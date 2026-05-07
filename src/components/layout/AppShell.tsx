@@ -113,7 +113,7 @@ export const AppShell = () => {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 relative z-10 overflow-auto">
+      <main className="flex-1 relative z-10 overflow-auto pt-14 md:pt-0">
         <Outlet />
       </main>
     </div>
