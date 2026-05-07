@@ -1,0 +1,16 @@
+{
+  "name": "JARVIS AI — Assistente Inteligente Pessoal",
+  "short_name": "JARVIS",
+  "description": "Seu assessor de IA: agenda, emails, projetos e SaaS via voz e texto.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05080d",
+  "theme_color": "#00f0d0",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
