@@ -1,18 +1,18 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { pickVoice, VoiceGender } from "./useVoicePreference";
 
-function speak(text: string) {
+function speak(text: string, gender: VoiceGender = "male") {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "pt-BR";
     u.rate = 1;
-    u.pitch = 1;
-    const voices = window.speechSynthesis.getVoices();
-    const ptVoice = voices.find((v) => v.lang?.toLowerCase().startsWith("pt"));
-    if (ptVoice) u.voice = ptVoice;
+    u.pitch = gender === "female" ? 1.15 : 0.95;
+    const v = pickVoice(gender);
+    if (v) u.voice = v;
     window.speechSynthesis.speak(u);
   } catch (e) {
     console.warn("speak fail", e);
@@ -35,7 +35,7 @@ function fmtTime(iso?: string) {
 
 const SESSION_KEY = "jarvis_greeted_session";
 
-export function useJarvisGreeting(voiceEnabled = true, muteText = false) {
+export function useJarvisGreeting(voiceEnabled = true, muteText = false, voiceGender: VoiceGender = "male") {
   const { user, loading } = useAuth();
   const ran = useRef(false);
 
@@ -97,7 +97,7 @@ export function useJarvisGreeting(voiceEnabled = true, muteText = false) {
         : " Deseja saber mais detalhes da sua agenda?";
 
       const fullText = welcome + agendaPhrase + closing;
-      speak(fullText);
+      speak(fullText, voiceGender);
       if (muteText) {
         // Silencia qualquer output textual da saudação — aqui apenas garantimos que não logamos
         // Em futuro: pode esconder overlay de legenda

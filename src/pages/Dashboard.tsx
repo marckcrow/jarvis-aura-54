@@ -4,6 +4,7 @@ import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckC
 import { Link } from "react-router-dom";
 import { useJarvisGreeting } from "@/hooks/useJarvisGreeting";
 import { useVoiceMode } from "@/hooks/useVoiceMode";
+import { useVoicePreference } from "@/hooks/useVoicePreference";
 import { useState } from "react";
 
 const stats = [
@@ -23,7 +24,8 @@ const activity = [
 const Dashboard = () => {
   const [voiceOn, setVoiceOn] = useVoiceMode();
   const [muteText, setMuteText] = useState(false);
-  useJarvisGreeting(voiceOn, muteText);
+  const [voiceGender, setVoiceGender] = useVoicePreference();
+  useJarvisGreeting(voiceOn, muteText, voiceGender);
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -46,6 +48,22 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <div className="flex rounded-lg border border-primary/20 overflow-hidden text-[10px] font-mono">
+              <button
+                onClick={() => setVoiceGender("male")}
+                className={`px-2.5 py-2 transition-all ${voiceGender === "male" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                title="Voz masculina"
+              >
+                ♂ MASC
+              </button>
+              <button
+                onClick={() => setVoiceGender("female")}
+                className={`px-2.5 py-2 transition-all border-l border-primary/20 ${voiceGender === "female" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                title="Voz feminina"
+              >
+                ♀ FEM
+              </button>
+            </div>
             <button
               onClick={() => setMuteText((v) => !v)}
               title={muteText ? "Texto silenciado" : "Silenciar texto ao falar"}
