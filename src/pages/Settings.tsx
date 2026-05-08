@@ -3,6 +3,7 @@ import { User, Volume2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useVoicePreference, pickVoice } from "@/hooks/useVoicePreference";
 
 type Gender = "masculino" | "feminino" | "neutro";
 
@@ -10,6 +11,7 @@ const Settings = () => {
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [gender, setGender] = useState<Gender>("neutro");
+  const [voiceGender, setVoiceGender] = useVoicePreference();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -52,7 +54,8 @@ const Settings = () => {
       treat ? `${greet}, ${treat}. Sistema JARVIS online.` : `${greet}. Sistema JARVIS online.`
     );
     u.lang = "pt-BR";
-    const v = window.speechSynthesis.getVoices().find((vv) => vv.lang?.toLowerCase().startsWith("pt"));
+    u.pitch = voiceGender === "female" ? 1.15 : 0.95;
+    const v = pickVoice(voiceGender);
     if (v) u.voice = v;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
@@ -108,6 +111,28 @@ const Settings = () => {
                     onClick={() => setGender(opt.v)}
                     className={`py-3 rounded-xl border text-sm font-mono tracking-wider transition-all ${
                       gender === opt.v
+                        ? "border-primary bg-primary/10 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.3)]"
+                        : "border-primary/20 text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-mono tracking-wider text-muted-foreground uppercase">Voz do JARVIS</label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { v: "male", label: "♂ Masculina" },
+                  { v: "female", label: "♀ Feminina" },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.v}
+                    onClick={() => setVoiceGender(opt.v)}
+                    className={`py-3 rounded-xl border text-sm font-mono tracking-wider transition-all ${
+                      voiceGender === opt.v
                         ? "border-primary bg-primary/10 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.3)]"
                         : "border-primary/20 text-muted-foreground hover:border-primary/40"
                     }`}
