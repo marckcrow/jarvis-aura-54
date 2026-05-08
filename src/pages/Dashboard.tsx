@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [voiceOn, setVoiceOn] = useVoiceMode();
   const [muteText, setMuteText] = useState(false);
   useJarvisGreeting(voiceOn, muteText);
+  return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
       <motion.div
