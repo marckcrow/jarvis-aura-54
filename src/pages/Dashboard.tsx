@@ -36,9 +36,9 @@ const Dashboard = () => {
           <div className="h-px w-8 bg-primary" />
           <span className="text-xs font-mono tracking-[0.3em] text-primary">SISTEMA ATIVO</span>
         </div>
-        <div className="flex items-end justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-4xl font-bold mb-1">
+            <h1 className="font-display text-2xl sm:text-4xl font-bold mb-1">
               Bem-vindo de volta, <span className="text-gradient">Senhor</span>
             </h1>
             <p className="text-muted-foreground font-mono text-sm">
@@ -49,12 +49,12 @@ const Dashboard = () => {
             <button
               onClick={() => setMuteText((v) => !v)}
               title={muteText ? "Texto silenciado" : "Silenciar texto ao falar"}
-              className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border transition-all ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border transition-all ${
                 muteText ? "border-primary bg-primary/10 text-primary" : "border-primary/20 text-muted-foreground hover:border-primary/40"
               }`}
             >
               {muteText ? <VolumeOff className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-              {muteText ? "TEXTO OFF" : "SILENCIAR TEXTO"}
+              <span className="hidden sm:inline">{muteText ? "TEXTO OFF" : "SILENCIAR TEXTO"}</span>
             </button>
             <button
               onClick={() => setVoiceOn((v) => !v)}
@@ -69,7 +69,7 @@ const Dashboard = () => {
                 }`}
               />
             </button>
-            <span className="text-[10px] font-mono text-muted-foreground tracking-wider hidden sm:inline">
+            <span className="text-[10px] font-mono text-muted-foreground tracking-wider">
               VOZ {voiceOn ? "ON" : "OFF"}
             </span>
           </div>
