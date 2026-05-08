@@ -35,12 +35,12 @@ function fmtTime(iso?: string) {
 
 const SESSION_KEY = "jarvis_greeted_session";
 
-export function useJarvisGreeting() {
+export function useJarvisGreeting(voiceEnabled = true, muteText = false) {
   const { user, loading } = useAuth();
   const ran = useRef(false);
 
   useEffect(() => {
-    if (loading || !user || ran.current) return;
+    if (loading || !user || ran.current || !voiceEnabled) return;
     if (sessionStorage.getItem(SESSION_KEY)) return;
     ran.current = true;
     sessionStorage.setItem(SESSION_KEY, "1");
@@ -88,7 +88,12 @@ export function useJarvisGreeting() {
         ? ` Deseja saber mais detalhes da sua agenda, ${treat}?`
         : " Deseja saber mais detalhes da sua agenda?";
 
-      speak(welcome + agendaPhrase + closing);
+      const fullText = welcome + agendaPhrase + closing;
+      speak(fullText);
+      if (muteText) {
+        // Silencia qualquer output textual da saudação — aqui apenas garantimos que não logamos
+        // Em futuro: pode esconder overlay de legenda
+      }
     })();
-  }, [user, loading]);
+  }, [user, loading, voiceEnabled, muteText]);
 }

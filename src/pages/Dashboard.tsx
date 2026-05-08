@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { JarvisAvatar } from "@/components/jarvis/JarvisAvatar";
-import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckCircle2 } from "lucide-react";
+import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckCircle2, Volume2, VolumeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useJarvisGreeting } from "@/hooks/useJarvisGreeting";
+import { useVoiceMode } from "@/hooks/useVoiceMode";
+import { useState } from "react";
 
 const stats = [
   { label: "Conversas", value: "247", change: "+12%", icon: MessageSquare },
@@ -19,7 +21,9 @@ const activity = [
 ];
 
 const Dashboard = () => {
-  useJarvisGreeting();
+  const [voiceOn, setVoiceOn] = useVoiceMode();
+  const [muteText, setMuteText] = useState(false);
+  useJarvisGreeting(voiceOn, muteText);
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -32,12 +36,44 @@ const Dashboard = () => {
           <div className="h-px w-8 bg-primary" />
           <span className="text-xs font-mono tracking-[0.3em] text-primary">SISTEMA ATIVO</span>
         </div>
-        <h1 className="font-display text-4xl font-bold mb-1">
-          Bem-vindo de volta, <span className="text-gradient">Senhor</span>
-        </h1>
-        <p className="text-muted-foreground font-mono text-sm">
-          {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-2xl sm:text-4xl font-bold mb-1">
+              Bem-vindo de volta, <span className="text-gradient">Senhor</span>
+            </h1>
+            <p className="text-muted-foreground font-mono text-sm">
+              {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMuteText((v) => !v)}
+              title={muteText ? "Texto silenciado" : "Silenciar texto ao falar"}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border transition-all ${
+                muteText ? "border-primary bg-primary/10 text-primary" : "border-primary/20 text-muted-foreground hover:border-primary/40"
+              }`}
+            >
+              {muteText ? <VolumeOff className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{muteText ? "TEXTO OFF" : "SILENCIAR TEXTO"}</span>
+            </button>
+            <button
+              onClick={() => setVoiceOn((v) => !v)}
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 ${
+                voiceOn ? "bg-primary" : "bg-muted border border-primary/20"
+              }`}
+              title={voiceOn ? "Desligar voz" : "Ligar voz"}
+            >
+              <span
+                className={`inline-block h-5 w-5 rounded-full bg-primary-foreground shadow transition-transform duration-300 ${
+                  voiceOn ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+            <span className="text-[10px] font-mono text-muted-foreground tracking-wider">
+              VOZ {voiceOn ? "ON" : "OFF"}
+            </span>
+          </div>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-12 gap-6">
