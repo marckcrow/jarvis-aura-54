@@ -40,6 +40,14 @@ export function useJarvisGreeting(voiceEnabled = true, muteText = false) {
   const ran = useRef(false);
 
   useEffect(() => {
+    if (!voiceEnabled) {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+  }, [voiceEnabled]);
+
+  useEffect(() => {
     if (loading || !user || ran.current || !voiceEnabled) return;
     if (sessionStorage.getItem(SESSION_KEY)) return;
     ran.current = true;
