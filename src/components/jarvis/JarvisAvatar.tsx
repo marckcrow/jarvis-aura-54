@@ -132,6 +132,12 @@ export const JarvisAvatar = ({ state = "idle", size = 200 }: JarvisAvatarProps) 
   const coreScale = 1 + intensity * 0.08;
   const glow = 0.3 + intensity * 0.7;
 
+  // VU meter ring config
+  const VU_BARS = 56;
+  const vuRadius = VB / 2 - 6;
+  const vuInner = vuRadius - 4;
+  const vuOuterMax = vuRadius + 8;
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
       {/* Outer slow ring */}
@@ -169,6 +175,47 @@ export const JarvisAvatar = ({ state = "idle", size = 200 }: JarvisAvatarProps) 
 
         {/* Halo */}
         <circle cx={cx} cy={cy} r={VB / 2 - 4} fill="url(#jhalo)" />
+
+        {/* VU meter ring */}
+        <g filter="url(#jglow)">
+          {Array.from({ length: VU_BARS }).map((_, i) => {
+            const t = performance.now() / 1000;
+            const angle = (i / VU_BARS) * Math.PI * 2 - Math.PI / 2;
+            // Per-bar oscillation driven by amplitude
+            const wob = 0.5 + 0.5 * Math.sin(t * (3 + (i % 7) * 0.4) + i * 0.35);
+            const level = Math.min(1, intensity * (0.55 + wob * 0.85));
+            const outer = vuInner + (vuOuterMax - vuInner) * level;
+            const x1 = cx + Math.cos(angle) * vuInner;
+            const y1 = cy + Math.sin(angle) * vuInner;
+            const x2 = cx + Math.cos(angle) * outer;
+            const y2 = cy + Math.sin(angle) * outer;
+            const hot = level > 0.75;
+            return (
+              <line
+                key={`vu-${i}`}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke={hot ? "hsl(168 100% 70%)" : "hsl(204 100% 60%)"}
+                strokeOpacity={0.25 + level * 0.75}
+                strokeWidth={1.4}
+                strokeLinecap="round"
+              />
+            );
+          })}
+          {/* Guide ring */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={vuRadius}
+            fill="none"
+            stroke="hsl(168 100% 60%)"
+            strokeOpacity={0.08 + intensity * 0.15}
+            strokeWidth={0.4}
+            strokeDasharray="1 3"
+          />
+        </g>
 
         {/* Connection lines */}
         <g filter="url(#jglow)">
