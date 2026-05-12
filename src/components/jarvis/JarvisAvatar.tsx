@@ -138,6 +138,13 @@ export const JarvisAvatar = ({ state = "idle", size = 200 }: JarvisAvatarProps) 
   const vuInner = vuRadius - 4;
   const vuOuterMax = vuRadius + 8;
 
+  // Peak-hold per bar (decays over time)
+  const peaksRef = useRef<{ value: number; updatedAt: number }[]>(
+    Array.from({ length: VU_BARS }, () => ({ value: 0, updatedAt: 0 }))
+  );
+  const PEAK_HOLD_MS = 450; // tempo segurando o pico
+  const PEAK_DECAY = 0.85; // fração por segundo após hold
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
       {/* Outer slow ring */}
@@ -176,32 +183,61 @@ export const JarvisAvatar = ({ state = "idle", size = 200 }: JarvisAvatarProps) 
         {/* Halo */}
         <circle cx={cx} cy={cy} r={VB / 2 - 4} fill="url(#jhalo)" />
 
-        {/* VU meter ring */}
+        {/* VU meter ring + peak hold */}
         <g filter="url(#jglow)">
           {Array.from({ length: VU_BARS }).map((_, i) => {
-            const t = performance.now() / 1000;
+            const now = performance.now();
+            const t = now / 1000;
             const angle = (i / VU_BARS) * Math.PI * 2 - Math.PI / 2;
             // Per-bar oscillation driven by amplitude
             const wob = 0.5 + 0.5 * Math.sin(t * (3 + (i % 7) * 0.4) + i * 0.35);
             const level = Math.min(1, intensity * (0.55 + wob * 0.85));
+
+            // Update peak-hold
+            const peak = peaksRef.current[i];
+            if (level >= peak.value) {
+              peak.value = level;
+              peak.updatedAt = now;
+            } else if (now - peak.updatedAt > PEAK_HOLD_MS) {
+              const dt = (now - peak.updatedAt - PEAK_HOLD_MS) / 1000;
+              peak.value = Math.max(level, peak.value - PEAK_DECAY * dt);
+            }
+
             const outer = vuInner + (vuOuterMax - vuInner) * level;
             const x1 = cx + Math.cos(angle) * vuInner;
             const y1 = cy + Math.sin(angle) * vuInner;
             const x2 = cx + Math.cos(angle) * outer;
             const y2 = cy + Math.sin(angle) * outer;
             const hot = level > 0.75;
+
+            // Peak marker position
+            const peakR = vuInner + (vuOuterMax - vuInner) * peak.value;
+            const px = cx + Math.cos(angle) * peakR;
+            const py = cy + Math.sin(angle) * peakR;
+            const peakHot = peak.value > 0.8;
+
             return (
-              <line
-                key={`vu-${i}`}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke={hot ? "hsl(168 100% 70%)" : "hsl(204 100% 60%)"}
-                strokeOpacity={0.25 + level * 0.75}
-                strokeWidth={1.4}
-                strokeLinecap="round"
-              />
+              <g key={`vu-${i}`}>
+                <line
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={hot ? "hsl(168 100% 70%)" : "hsl(204 100% 60%)"}
+                  strokeOpacity={0.25 + level * 0.75}
+                  strokeWidth={1.4}
+                  strokeLinecap="round"
+                />
+                {peak.value > 0.05 && (
+                  <circle
+                    cx={px}
+                    cy={py}
+                    r={1.3}
+                    fill={peakHot ? "hsl(0 100% 65%)" : "hsl(168 100% 80%)"}
+                    opacity={0.5 + peak.value * 0.5}
+                  />
+                )}
+              </g>
             );
           })}
           {/* Guide ring */}
