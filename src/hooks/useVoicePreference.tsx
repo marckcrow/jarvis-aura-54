@@ -33,21 +33,14 @@ export function pickVoice(gender: VoiceGender): SpeechSynthesisVoice | undefined
   const all = window.speechSynthesis.getVoices();
 
   if (gender === "male") {
-    // 1) Tenta voz britânica masculina (estilo JARVIS) em qualquer idioma do sistema.
-    const enGB = all.filter((v) => v.lang?.toLowerCase().startsWith("en-gb"));
-    const jarvis =
-      enGB.find((v) => JARVIS_MALE_HINTS.some((h) => v.name.toLowerCase().includes(h))) ||
-      all.find((v) => JARVIS_MALE_HINTS.some((h) => v.name.toLowerCase().includes(h)));
-    if (jarvis) return jarvis;
-    // 2) Qualquer voz en-GB que não pareça feminina.
-    const enGBNeutral = enGB.find((v) => !FEMALE_HINTS.some((h) => v.name.toLowerCase().includes(h)));
-    if (enGBNeutral) return enGBNeutral;
-    // 3) Fallback para voz pt masculina.
+    // Apenas vozes em português; preferimos pt-BR masculinas com timbre grave (estilo JARVIS).
     const pt = all.filter((v) => v.lang?.toLowerCase().startsWith("pt"));
-    const ptMale = pt.find((v) => MALE_HINTS.some((h) => v.name.toLowerCase().includes(h)));
+    const ptBR = pt.filter((v) => v.lang?.toLowerCase().includes("br"));
+    const pool = ptBR.length ? ptBR : pt;
+    const ptMale = pool.find((v) => MALE_HINTS.some((h) => v.name.toLowerCase().includes(h)));
     if (ptMale) return ptMale;
-    const ptNotFemale = pt.find((v) => !FEMALE_HINTS.some((h) => v.name.toLowerCase().includes(h)));
-    return ptNotFemale || pt[0] || all[0];
+    const ptNotFemale = pool.find((v) => !FEMALE_HINTS.some((h) => v.name.toLowerCase().includes(h)));
+    return ptNotFemale || pool[0] || all[0];
   }
 
   // Feminino: prioriza pt-BR feminina.
