@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { JarvisAvatar } from "@/components/jarvis/JarvisAvatar";
-import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckCircle2, Volume2, VolumeOff } from "lucide-react";
+import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckCircle2, Volume2, VolumeOff, Hand } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useJarvisGreeting } from "@/hooks/useJarvisGreeting";
+import { useJarvisGreeting, speak } from "@/hooks/useJarvisGreeting";
 import { useVoiceMode } from "@/hooks/useVoiceMode";
 import { useVoicePreference } from "@/hooks/useVoicePreference";
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
+import { useClapTrigger } from "@/hooks/useClapTrigger";
 
 const stats = [
   { label: "Conversas", value: "247", change: "+12%", icon: MessageSquare },
@@ -26,6 +27,27 @@ const Dashboard = () => {
   const [muteText, setMuteText] = useState(false);
   const [voiceGender, setVoiceGender] = useVoicePreference();
   useJarvisGreeting(voiceOn, muteText, voiceGender);
+
+  const lastClapAtRef = useRef(0);
+  const handleClapGreeting = useCallback(() => {
+    const now = Date.now();
+    if (now - lastClapAtRef.current < 4000) return; // anti-repetição
+    lastClapAtRef.current = now;
+    if (!voiceOn) return;
+    speak(
+      "Bem-vindo de volta, Senhor. Sua produção ontem foi excelente. O que vamos desenvolver hoje?",
+      voiceGender,
+    );
+  }, [voiceOn, voiceGender]);
+
+  const { listening: clapOn, start: startClap, stop: stopClap } = useClapTrigger({
+    enabled: true,
+    onTrigger: handleClapGreeting,
+    claps: 2,
+    windowMs: 1200,
+    threshold: 0.28,
+  });
+
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -48,6 +70,16 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => (clapOn ? stopClap() : startClap())}
+              title={clapOn ? "Desativar detecção de palmas" : "Ativar 2 palmas para saudação"}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border transition-all ${
+                clapOn ? "border-primary bg-primary/10 text-primary animate-pulse" : "border-primary/20 text-muted-foreground hover:border-primary/40"
+              }`}
+            >
+              <Hand className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{clapOn ? "PALMAS ON" : "2 PALMAS"}</span>
+            </button>
             <div className="flex rounded-lg border border-primary/20 overflow-hidden text-[10px] font-mono">
               <button
                 onClick={() => setVoiceGender("male")}
