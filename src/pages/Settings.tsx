@@ -53,10 +53,17 @@ const Settings = () => {
     const u = new SpeechSynthesisUtterance(
       treat ? `${greet}, ${treat}. Sistema JARVIS online.` : `${greet}. Sistema JARVIS online.`
     );
-    u.lang = "pt-BR";
-    u.pitch = voiceGender === "female" ? 1.15 : 0.95;
     const v = pickVoice(voiceGender);
     if (v) u.voice = v;
+    if (voiceGender === "male") {
+      u.lang = v?.lang || "en-GB";
+      u.rate = 0.92;
+      u.pitch = 0.78;
+    } else {
+      u.lang = v?.lang || "pt-BR";
+      u.rate = 1;
+      u.pitch = 1.15;
+    }
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   };
