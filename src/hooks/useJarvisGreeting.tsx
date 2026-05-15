@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { pickVoice, VoiceGender } from "./useVoicePreference";
 
-function speak(text: string, gender: VoiceGender = "male") {
+export function speak(text: string, gender: VoiceGender = "male") {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
     window.speechSynthesis.cancel();
