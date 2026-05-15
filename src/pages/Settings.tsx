@@ -56,9 +56,9 @@ const Settings = () => {
     const v = pickVoice(voiceGender);
     if (v) u.voice = v;
     if (voiceGender === "male") {
-      u.lang = v?.lang || "en-GB";
-      u.rate = 0.92;
-      u.pitch = 0.78;
+      u.lang = "pt-BR";
+      u.rate = 0.95;
+      u.pitch = 0.8;
     } else {
       u.lang = v?.lang || "pt-BR";
       u.rate = 1;
