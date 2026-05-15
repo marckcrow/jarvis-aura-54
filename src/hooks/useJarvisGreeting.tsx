@@ -11,10 +11,10 @@ export function speak(text: string, gender: VoiceGender = "male") {
     const v = pickVoice(gender);
     if (v) u.voice = v;
     if (gender === "male") {
-      // Estilo JARVIS (Iron Man): britânico, grave, cadência calma e formal.
-      u.lang = v?.lang || "en-GB";
-      u.rate = 0.92;
-      u.pitch = 0.78;
+      // Estilo JARVIS em pt-BR: grave, cadência calma e formal.
+      u.lang = "pt-BR";
+      u.rate = 0.95;
+      u.pitch = 0.8;
     } else {
       u.lang = v?.lang || "pt-BR";
       u.rate = 1;
