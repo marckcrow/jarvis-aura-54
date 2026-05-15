@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { JarvisAvatar } from "@/components/jarvis/JarvisAvatar";
-import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckCircle2, Volume2, VolumeOff, Hand } from "lucide-react";
+import { Activity, Brain, MessageSquare, Zap, TrendingUp, Calendar, Mail, CheckCircle2, Volume2, VolumeOff, Hand, MicOff, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useJarvisGreeting, speak } from "@/hooks/useJarvisGreeting";
 import { useVoiceMode } from "@/hooks/useVoiceMode";
@@ -40,13 +40,21 @@ const Dashboard = () => {
     );
   }, [voiceOn, voiceGender]);
 
-  const { listening: clapOn, start: startClap, stop: stopClap } = useClapTrigger({
+  const { listening: clapOn, start: startClap, stop: stopClap, error: clapError, progress: clapProgress, claps: clapTarget } = useClapTrigger({
     enabled: true,
     onTrigger: handleClapGreeting,
     claps: 2,
     windowMs: 1200,
     threshold: 0.28,
   });
+
+  const clapStatus = clapError
+    ? { label: "ERRO MIC", color: "text-destructive border-destructive/40 bg-destructive/10", Icon: AlertTriangle, dot: "bg-destructive" }
+    : !clapOn
+    ? { label: "OFF", color: "text-muted-foreground border-primary/20", Icon: MicOff, dot: "bg-muted-foreground/40" }
+    : clapProgress > 0
+    ? { label: `DETECTANDO ${clapProgress}/${clapTarget}`, color: "text-accent border-accent/40 bg-accent/10", Icon: Hand, dot: "bg-accent" }
+    : { label: "OUVINDO", color: "text-primary border-primary/40 bg-primary/10", Icon: Hand, dot: "bg-primary" };
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -72,13 +80,17 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => (clapOn ? stopClap() : startClap())}
-              title={clapOn ? "Desativar detecção de palmas" : "Ativar 2 palmas para saudação"}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border transition-all ${
-                clapOn ? "border-primary bg-primary/10 text-primary animate-pulse" : "border-primary/20 text-muted-foreground hover:border-primary/40"
-              }`}
+              title={clapError ?? (clapOn ? "Desativar detecção de palmas" : "Ativar 2 palmas para saudação")}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border transition-all ${clapStatus.color}`}
             >
-              <Hand className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{clapOn ? "PALMAS ON" : "2 PALMAS"}</span>
+              <span className="relative flex h-2 w-2">
+                {clapOn && !clapError && (
+                  <span className={`absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping ${clapStatus.dot}`} />
+                )}
+                <span className={`relative inline-flex h-2 w-2 rounded-full ${clapStatus.dot}`} />
+              </span>
+              <clapStatus.Icon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline tracking-wider">{clapStatus.label}</span>
             </button>
             <div className="flex rounded-lg border border-primary/20 overflow-hidden text-[10px] font-mono">
               <button
