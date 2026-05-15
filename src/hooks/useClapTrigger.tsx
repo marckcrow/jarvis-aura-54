@@ -23,6 +23,8 @@ export function useClapTrigger({
 }: Options) {
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0); // palmas detectadas dentro da janela
+  const [lastClapAt, setLastClapAt] = useState(0);
   const ctxRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -38,6 +40,7 @@ export function useClapTrigger({
     ctxRef.current?.close().catch(() => {});
     ctxRef.current = null;
     setListening(false);
+    setProgress(0);
   };
 
   const start = async () => {
@@ -74,10 +77,18 @@ export function useClapTrigger({
           const arr = clapsRef.current.filter((t) => now - t < windowMs);
           arr.push(now);
           clapsRef.current = arr;
+          setProgress(arr.length);
+          setLastClapAt(now);
           if (arr.length >= claps) {
             clapsRef.current = [];
+            setProgress(0);
             try { onTrigger(); } catch (e) { console.warn(e); }
           }
+        }
+        // expira progresso após a janela
+        if (clapsRef.current.length && now - clapsRef.current[clapsRef.current.length - 1] > windowMs) {
+          clapsRef.current = [];
+          setProgress(0);
         }
         rafRef.current = requestAnimationFrame(loop);
       };
@@ -94,5 +105,5 @@ export function useClapTrigger({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  return { listening, error, start, stop };
+  return { listening, error, progress, lastClapAt, start, stop, claps };
 }
