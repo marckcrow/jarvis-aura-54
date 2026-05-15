@@ -8,11 +8,18 @@ export function speak(text: string, gender: VoiceGender = "male") {
   try {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "pt-BR";
-    u.rate = 1;
-    u.pitch = gender === "female" ? 1.15 : 0.95;
     const v = pickVoice(gender);
     if (v) u.voice = v;
+    if (gender === "male") {
+      // Estilo JARVIS (Iron Man): britânico, grave, cadência calma e formal.
+      u.lang = v?.lang || "en-GB";
+      u.rate = 0.92;
+      u.pitch = 0.78;
+    } else {
+      u.lang = v?.lang || "pt-BR";
+      u.rate = 1;
+      u.pitch = 1.15;
+    }
     window.speechSynthesis.speak(u);
   } catch (e) {
     console.warn("speak fail", e);
