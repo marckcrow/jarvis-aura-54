@@ -14,6 +14,18 @@ const Settings = () => {
   const [voiceGender, setVoiceGender] = useVoicePreference();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [maleVoiceInfo, setMaleVoiceInfo] = useState<{ name: string; lang: string } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const refresh = () => {
+      const v = pickVoice("male");
+      setMaleVoiceInfo(v ? { name: v.name, lang: v.lang } : null);
+    };
+    refresh();
+    window.speechSynthesis.onvoiceschanged = refresh;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -148,6 +160,23 @@ const Settings = () => {
                   </button>
                 ))}
               </div>
+              {voiceGender === "male" && (
+                <div className="text-xs font-mono text-muted-foreground pt-1">
+                  {maleVoiceInfo ? (
+                    <>
+                      Voz atual: <span className="text-primary">{maleVoiceInfo.name}</span>{" "}
+                      <span className={maleVoiceInfo.lang?.toLowerCase().startsWith("pt") ? "text-primary" : "text-destructive"}>
+                        ({maleVoiceInfo.lang})
+                      </span>
+                      {!maleVoiceInfo.lang?.toLowerCase().includes("br") && (
+                        <span className="text-destructive"> — não é pt-BR</span>
+                      )}
+                    </>
+                  ) : (
+                    "Nenhuma voz disponível no navegador."
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
