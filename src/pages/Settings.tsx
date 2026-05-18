@@ -16,6 +16,27 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [maleVoiceInfo, setMaleVoiceInfo] = useState<{ name: string; lang: string } | null>(null);
 
+  const ptBrScore = (info: { name: string; lang: string } | null) => {
+    if (!info) return { score: 0, label: "Indisponível", tone: "text-destructive" };
+    const lang = (info.lang || "").toLowerCase();
+    const name = (info.name || "").toLowerCase();
+    let score = 0;
+    // Idioma (peso maior)
+    if (lang === "pt-br" || lang === "pt_br") score += 60;
+    else if (lang.includes("br")) score += 55;
+    else if (lang.startsWith("pt")) score += 35;
+    else if (lang.startsWith("en")) score += 5;
+    // Nome (heurística de vozes pt-BR conhecidas)
+    const ptBrNames = ["luciana", "felipe", "ricardo", "fernanda", "maria", "francisca", "antonio", "vitoria", "camila", "joão", "joao", "helena", "daniel pt", "google português do brasil", "microsoft maria", "microsoft francisca", "microsoft antonio"];
+    if (ptBrNames.some((n) => name.includes(n))) score += 35;
+    else if (name.includes("portugu")) score += 25;
+    else if (name.includes("brasil") || name.includes("brazil")) score += 30;
+    score = Math.min(100, score);
+    const tone = score >= 85 ? "text-primary" : score >= 60 ? "text-accent" : "text-destructive";
+    const label = score >= 85 ? "Excelente" : score >= 60 ? "Aceitável" : score >= 30 ? "Fraca" : "Incompatível";
+    return { score, label, tone };
+  };
+
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     const refresh = () => {
@@ -163,7 +184,8 @@ const Settings = () => {
               {voiceGender === "male" && (
                 <div className="text-xs font-mono text-muted-foreground pt-1">
                   {maleVoiceInfo ? (
-                    <>
+                    <div className="space-y-1">
+                      <div>
                       Voz atual: <span className="text-primary">{maleVoiceInfo.name}</span>{" "}
                       <span className={maleVoiceInfo.lang?.toLowerCase().startsWith("pt") ? "text-primary" : "text-destructive"}>
                         ({maleVoiceInfo.lang})
@@ -171,7 +193,24 @@ const Settings = () => {
                       {!maleVoiceInfo.lang?.toLowerCase().includes("br") && (
                         <span className="text-destructive"> — não é pt-BR</span>
                       )}
-                    </>
+                      </div>
+                      {(() => {
+                        const s = ptBrScore(maleVoiceInfo);
+                        return (
+                          <div className="flex items-center gap-2">
+                            <span className="uppercase tracking-wider">Compat. pt-BR:</span>
+                            <span className={`font-bold ${s.tone}`}>{s.score}/100</span>
+                            <span className={s.tone}>· {s.label}</span>
+                            <div className="flex-1 h-1.5 rounded-full bg-muted/40 overflow-hidden max-w-[140px]">
+                              <div
+                                className={`h-full ${s.score >= 85 ? "bg-primary" : s.score >= 60 ? "bg-accent" : "bg-destructive"}`}
+                                style={{ width: `${s.score}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   ) : (
                     "Nenhuma voz disponível no navegador."
                   )}
