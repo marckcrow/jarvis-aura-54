@@ -3,8 +3,9 @@ import { LayoutDashboard, MessageSquare, FolderKanban, ListChecks, Plug, Setting
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
-const navItems = [
+const allNavItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/assistant", label: "Assistente", icon: MessageSquare },
   { to: "/command-center", label: "Comandos", icon: Terminal },
@@ -19,6 +20,8 @@ const navItems = [
 export const AppShell = () => {
   const { pathname } = useLocation();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const navItems = allNavItems.filter((i) => i.to !== "/admin" || isAdmin);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
