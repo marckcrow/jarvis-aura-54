@@ -19,6 +19,7 @@ import Memory from "./pages/Memory.tsx";
 import { AuthProvider } from "./hooks/useAuth.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 import { AdminRoute } from "./components/auth/AdminRoute.tsx";
+import AdminLogin from "./pages/AdminLogin.tsx";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/assistant" element={<Assistant />} />

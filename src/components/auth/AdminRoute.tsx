@@ -6,6 +6,6 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading) {
     return <div className="p-8 font-mono text-xs tracking-widest text-primary animate-pulse">VERIFICANDO PERMISSÕES...</div>;
   }
-  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  if (!isAdmin) return <Navigate to="/admin/login" replace />;
   return <>{children}</>;
 };
