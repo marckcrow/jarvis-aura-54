@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/jarvis/StatusBadge";
 import { Terminal, ChevronRight, Check, X, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { CalendarConnectionBadge } from "@/components/jarvis/CalendarConnectionBadge";
+import { executeInternalAction, isInternalAction } from "@/lib/internalActions";
 
 type Cmd = {
   id: string;
@@ -83,6 +84,13 @@ const CommandCenter = () => {
       }
       const link = (data as { html_link?: string })?.html_link;
       toast.success(link ? "Evento criado no Google Calendar" : "Evento criado");
+      return;
+    }
+
+    if (isInternalAction(action.action_type)) {
+      const r = await executeInternalAction(action);
+      if (r.ok) toast.success(action.action_type === "create_task" ? "Tarefa criada" : "Projeto criado");
+      else toast.error(r.error);
       return;
     }
 
@@ -203,7 +211,7 @@ const CommandCenter = () => {
                       <pre className="text-[10px] font-mono text-muted-foreground bg-background/50 p-2 rounded overflow-x-auto max-h-32">
 {JSON.stringify(a.payload, null, 2)}
                       </pre>
-                      {a.status === "awaiting_confirmation" && (
+                      {(a.status === "awaiting_confirmation" || (a.status === "ready" && isInternalAction(a.action_type))) && (
                         <div className="flex gap-2">
                           <button onClick={() => confirmAction(a, true)} className="flex-1 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-mono tracking-wider hover:shadow-[0_0_12px_hsl(var(--primary)/0.5)] flex items-center justify-center gap-1">
                             <Check className="w-3 h-3" /> APROVAR
