@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/jarvis/StatusBadge";
 import { Terminal, ChevronRight, Check, X, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { CalendarConnectionBadge } from "@/components/jarvis/CalendarConnectionBadge";
+import { executeInternalAction, isInternalAction } from "@/lib/internalActions";
 
 type Cmd = {
   id: string;
@@ -83,6 +84,13 @@ const CommandCenter = () => {
       }
       const link = (data as { html_link?: string })?.html_link;
       toast.success(link ? "Evento criado no Google Calendar" : "Evento criado");
+      return;
+    }
+
+    if (isInternalAction(action.action_type)) {
+      const r = await executeInternalAction(action);
+      if (r.ok) toast.success(action.action_type === "create_task" ? "Tarefa criada" : "Projeto criado");
+      else toast.error(r.error);
       return;
     }
 
