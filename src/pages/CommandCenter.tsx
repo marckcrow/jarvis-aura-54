@@ -211,7 +211,7 @@ const CommandCenter = () => {
                       <pre className="text-[10px] font-mono text-muted-foreground bg-background/50 p-2 rounded overflow-x-auto max-h-32">
 {JSON.stringify(a.payload, null, 2)}
                       </pre>
-                      {a.status === "awaiting_confirmation" && (
+                      {(a.status === "awaiting_confirmation" || (a.status === "ready" && isInternalAction(a.action_type))) && (
                         <div className="flex gap-2">
                           <button onClick={() => confirmAction(a, true)} className="flex-1 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-mono tracking-wider hover:shadow-[0_0_12px_hsl(var(--primary)/0.5)] flex items-center justify-center gap-1">
                             <Check className="w-3 h-3" /> APROVAR

@@ -63,6 +63,10 @@ const Assistant = () => {
         }]);
         if (data.requires_confirmation) {
           toast.info("Ação aguardando confirmação no Command Center.");
+        } else if (data.action_id && isInternalAction(data.intent)) {
+          const r = await executeInternalAction({ id: data.action_id, action_type: data.intent, payload: data.payload });
+          if (r.ok) toast.success(data.intent === "create_task" ? "Tarefa criada em Tarefas" : "Projeto criado em Projetos");
+          else toast.error(r.error);
         }
       }
     } catch (e) {
