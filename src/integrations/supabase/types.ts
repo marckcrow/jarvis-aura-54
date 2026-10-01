@@ -223,6 +223,104 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          created_at: string
+          deadline: string | null
+          description: string | null
+          goals: string | null
+          id: string
+          name: string
+          progress: number
+          source_action_id: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          goals?: string | null
+          id?: string
+          name: string
+          progress?: number
+          source_action_id?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          goals?: string | null
+          id?: string
+          name?: string
+          progress?: number
+          source_action_id?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          description: string | null
+          done: boolean
+          due_at: string | null
+          id: string
+          priority: string
+          project_id: string | null
+          source_action_id: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          done?: boolean
+          due_at?: string | null
+          id?: string
+          priority?: string
+          project_id?: string | null
+          source_action_id?: string | null
+          tenant_id?: string
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          done?: boolean
+          due_at?: string | null
+          id?: string
+          priority?: string
+          project_id?: string | null
+          source_action_id?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
