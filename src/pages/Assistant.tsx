@@ -5,6 +5,7 @@ import { Send, Mic, Square, Sparkles, ShieldAlert } from "lucide-react";
 import { JarvisAvatar } from "@/components/jarvis/JarvisAvatar";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { executeInternalAction, isInternalAction } from "@/lib/internalActions";
 
 type Msg = {
   role: "user" | "assistant";
